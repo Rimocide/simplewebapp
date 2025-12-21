@@ -1,0 +1,31 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  color: #007acc;
+  margin-top: 1rem;
+}
+
+.post {
+  background: white;
+  max-width: 600px;
+  margin: 1rem auto;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.post h3 {
+  margin-top: 0;
+  color: #007acc;
+}
+
+.post p {
+  margin-bottom: 0;
+  color: #333;
+}

@@ -69,6 +69,7 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USER }}
         password: ${{ secrets.EMAIL_PASS }}
+        from: CI Pipeline <${{ secrets.EMAIL_USER }}>
         to: ${{ secrets.QA_EMAIL }}
         subject: Testing Deployment Successful
         body: |
@@ -84,6 +85,7 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USER }}
         password: ${{ secrets.EMAIL_PASS }}
+        from: CI Pipeline <${{ secrets.EMAIL_USER }}>
         to: ${{ secrets.DEV_EMAIL }}
         subject: Testing Pipeline Failed
         body: |

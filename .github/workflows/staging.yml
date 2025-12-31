@@ -3,61 +3,51 @@ name: Staging Pipeline
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'tf/**'
   workflow_dispatch:
 
+env:
+  AWS_REGION: us-east-1
+
 jobs:
-  test-and-deploy:
+  deploy-infrastructure:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
-        node-version: 18
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
-    # ---------- BACKEND ----------
-    - name: Install backend dependencies
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
       run: |
-        cd backend
-        npm install
+        cd tf
+        terraform init
 
-    - name: Backend tests
+    - name: Terraform Plan
       run: |
-        cd backend
-        npm test
+        cd tf
+        terraform plan
 
-    # ---------- FRONTEND ----------
-    - name: Install frontend dependencies
+    - name: Terraform Apply
       run: |
-        cd frontend
-        npm install
+        cd tf
+        terraform apply -auto-approve
 
-    - name: Frontend tests
+    - name: Get Public EC2 IP
+      id: get-ip
       run: |
-        cd frontend
-        npm test
-
-    - name: Build frontend
-      run: |
-        cd frontend
-        npm run build
-
-    # ---------- DEPLOY ----------
-    - name: Deploy to Staging EC2
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.STAGE_EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /var/www/simplewebapp
-          git pull origin main
-          docker compose down
-          docker compose build
-          docker compose up -d
+        cd tf
+        echo "PUBLIC_IP=$(terraform output -raw public_ec2_ip)" >> $GITHUB_OUTPUT
 
     # ---------- EMAILS ----------
     - name: Email QA (Success)
@@ -70,10 +60,11 @@ jobs:
         password: ${{ secrets.EMAIL_PASS }}
         from: CI Pipeline <${{ secrets.EMAIL_USER }}>
         to: ${{ secrets.QA_EMAIL }}
-        subject: Staging Deployment Successful
+        subject: Staging Infrastructure Deployed
         body: |
-          Staging Deployment Successful.
-          URL: http://${{ secrets.STAGE_EC2_HOST }}
+          Staging Infrastructure Deployed Successfully.
+          Public EC2 IP: ${{ steps.get-ip.outputs.PUBLIC_IP }}
+          URL: http://${{ steps.get-ip.outputs.PUBLIC_IP }}
           Branch: main
 
     - name: Email Developer (Failure)

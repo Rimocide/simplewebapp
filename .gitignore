@@ -3,3 +3,18 @@ backend/node_modules
 
 frontend/package-lock.json
 backend/package-lock.json
+
+# Terraform
+tf/.terraform/
+tf/*.tfstate
+tf/*.tfstate.backup
+tf/*.pem
+tf/.terraform.lock.hcl
+
+# Terraform
+tf/*.tfstate
+tf/*.tfstate.backup
+tf/.terraform/
+tf/.terraform.lock.hcl
+tf/*.pem
+.env

@@ -1,0 +1,27 @@
+# Simple: Frontend + Backend (no database)
+services:
+  backend:
+    build: ./backend
+    container_name: app-backend
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: app-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge

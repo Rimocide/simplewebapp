@@ -1,0 +1,57 @@
+# Full stack: Frontend + Backend + Database
+services:
+  database:
+    image: mariadb:10.11
+    # image: postgres:15-alpine  # Alternative
+    container_name: app-database
+    environment:
+      # MariaDB/MySQL
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+      # PostgreSQL (uncomment if using postgres)
+      # POSTGRES_USER: admin
+      # POSTGRES_PASSWORD: password
+      # POSTGRES_DB: appdb
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db-data:/var/lib/mysql
+      # - db-data:/var/lib/postgresql/data  # For postgres
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: app-backend
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: database
+      DB_USER: admin
+      DB_PASSWORD: password
+      DB_NAME: appdb
+    depends_on:
+      - database
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: app-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:

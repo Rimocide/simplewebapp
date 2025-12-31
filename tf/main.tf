@@ -54,7 +54,7 @@ output "ssh_private_key" {
   value     = module.Compute.ssh_private_key
   sensitive = true
 }
-}
+
 
 output "ssh_private_key" {
   value     = module.Compute.ssh_private_key

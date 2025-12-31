@@ -1,11 +1,32 @@
-version: "3.9"
 
 services:
+  database:
+    image: mariadb:10.11
+    container_name: simple-database
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: simpleapp
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+    restart: unless-stopped
+
   backend:
     build: ./backend
     container_name: simple-backend
     ports:
       - "5000:5000"
+    environment:
+      DB_HOST: database
+      DB_USER: admin
+      DB_PASSWORD: password
+      DB_NAME: simpleapp
+    depends_on:
+      - database
     networks:
       - app-network
     restart: unless-stopped
@@ -24,3 +45,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  db-data:
